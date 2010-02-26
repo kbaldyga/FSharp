@@ -5,7 +5,7 @@ let (>>=) monadBuilder f =
   fun state -> 
     let (var,newState) = monadBuilder state
     in (f var) newState
-let returnS a = fun s -> (a,s)
+
 type StateMonad() =
   member this.Bind(x,f) = x >>= f 
   member this.Return a = fun s -> (a,s)
