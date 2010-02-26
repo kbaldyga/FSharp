@@ -5,7 +5,7 @@ let (>>=) monadBuilder f =
   fun state -> 
     let (var,newState) = monadBuilder state
     in (f var) newState
-
+let returnS a = fun s -> (a,s)
 type StateMonad() =
   member this.Bind(x,f) = x >>= f 
   member this.Return a = fun s -> (a,s)
@@ -45,3 +45,14 @@ let rec labelTree tree =
     }
 
 let labeledTree =  (labelTree tree) 1
+
+let rec labelTreee tree = 
+    match tree with
+      | Leaf a ->
+          (fun s -> Leaf (a,s),(s+1))
+      | Node(l,r) ->
+          labelTreee l >>= 
+            (fun l' -> labelTreee r >>=
+              ( fun r' ->  
+                (Node(l',r') |> state.Return)))
+let labeledTree2 = labelTreee tree 1                
