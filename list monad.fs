@@ -21,6 +21,11 @@ let z =
     return (a,b)
   }
   
+let z2 = 
+  list.Bind([1..3], fun y ->
+    list.Bind((generateSomething y), fun x ->
+      list.Return (y,x) ) )  
+  
 let zz =
   list {
     let! a = [1..20]
