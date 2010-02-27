@@ -14,6 +14,7 @@ type StateMonad() =
   
 let state = StateMonad()
 
+(* BINARY TREE *)
 type Tree<'a> =
   | Leaf of 'a
   | Node of 'a Tree * 'a Tree  
@@ -24,9 +25,7 @@ let tree =
     Node(
       Leaf 10,
       Node(
-        Node(
           Leaf 20,
-          Leaf 20),
         Node(
           Leaf 78,
           Leaf 145))))
@@ -51,8 +50,40 @@ let rec labelTreee tree =
       | Leaf a ->
           (fun s -> Leaf (a,s),(s+1))
       | Node(l,r) ->
-          labelTreee l >>= 
-            (fun l' -> labelTreee r >>=
-              ( fun r' ->  
-                (Node(l',r') |> state.Return)))
-let labeledTree2 = labelTreee tree 1                
+          labelTreee l >>= (fun l' -> 
+            labelTreee r >>= ( fun r' ->  
+              (Node(l',r') |> state.Return)))
+let labeledTree2 = labelTreee tree 1      
+
+(* N ARY TREE *)
+type 'a LTree = | LNil of 'a | LNode of 'a LTree list
+let lt = 
+  LNode [ 
+    LNode [ LNil 10; LNil 24 ] ;
+    LNode [ LNil 23; LNil 56; LNil 45] ; 
+    LNil 35 ]
+
+let rec lrelabelLNode f tree =
+    let rec aux f tree' acc =
+      state{
+        match tree' with
+          | x::xs -> 
+              let! x' = f(x)
+              return! (aux f xs (acc@[x']))
+          | [] -> return acc
+       } 
+    in aux f tree []
+
+let rec lrelabel tree =
+  state {
+    match tree with
+      | LNil a->
+        let! s = StateMonad.get
+        do! StateMonad.put (s+1)
+        return LNil(s,a)
+      | LNode xs ->
+          let! xs' = lrelabelLNode lrelabel xs
+          return (LNode xs')
+  }
+
+let lrelabeledTree = lrelabel lt  1
