@@ -5,7 +5,7 @@ type Expr =
   | PLUS  | MINUS | TIMES | DIV
   | LPAREN  | RPAREN  | LBRACE  | RBRACE
   | SEMI  
-  | EQUAL | ASSOC | NOT
+  | EQUAL | ASSIGN | NOT
   | GT  | LT  | GE  | LE
   | PRINT
   | ID of string

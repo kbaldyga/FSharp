@@ -1,9 +1,9 @@
 # 1 "lexer.fsl"
 
-module lexer
+module Lexer
 open System
-//open Parser
-open Ast
+open Parser
+//open Ast
 open Microsoft.FSharp.Text
 open Microsoft.FSharp.Text.Lexing
 
@@ -207,7 +207,7 @@ and _fslex_token  _fslex_state lexbuf =
           )
   | 19 -> ( 
 # 35 "lexer.fsl"
-                ASSOC 
+                ASSIGN 
 # 211 "lexer.fs"
           )
   | 20 -> ( 

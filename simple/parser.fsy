@@ -1,1 +1,47 @@
 %{
+open Ast
+%}
+
+%start Expression
+
+%token <string> ID
+%token <System.Double> FLOAT
+%token <System.Int32> INT
+%token IF THEN ELSE
+%token PLUS MINUS TIMES DIV
+%token LPAREN RPAREN
+%token LBRACE RBRACE
+%token GT GE LT LE
+%token SEMI 
+%token PRINT
+%token EQUAL ASSIGN NOT
+%token EOF
+
+%type < Ast.Expr > Expression
+
+%left PLUS MINUS
+%left TIMES DIV
+%left GT GE LT LE
+
+
+
+%%
+
+Expression: 
+    | ID    { Ident($1) }
+    | FLOAT { Float($1) }
+    | INT   { Int($1) }
+    | ID ASSIGN Expression            { Assign($1, $3) }
+    | IF Expression THEN Expression   { IfThen($2, $4) }
+    | PRINT Expression                { Print($2) }
+    | LPAREN Expression RPAREN        { $2 }
+    | NOT Expression                  { Not($2) }
+    | TIMES Expression Expression     { Times($2, $3) }
+    | DIV Expression Expression       { Div($2, $3) }
+    | PLUS Expression Expression      { Plus($2, $3) }
+    | MINUS Expression Expression     { Minus($2, $3) }
+    | GT Expression Expression        { Gt($2, $3) }
+    | GE Expression Expression        { Ge($2, $3) }
+    | LT Expression Expression        { Lt($2, $3) }
+    | LE Expression Expression        { Le($2, $3) }
+    | EQUAL Expression Expression     { Equal($2, $3) }

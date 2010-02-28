@@ -1,8 +1,8 @@
 {
-module lexer
+module Lexer
 open System
-//open Parser
-open Ast
+open Parser
+//open Ast
 open Microsoft.FSharp.Text
 open Microsoft.FSharp.Text.Lexing
 }
@@ -32,7 +32,7 @@ rule token = parse
   | '}'             { RBRACE }
   | ';'             { SEMI }
   | "=="            { EQUAL }
-  | '='             { ASSOC }
+  | '='             { ASSIGN }
   | '>'             { GT }
   | '<'             { LT }
   | ">="            { GE }
