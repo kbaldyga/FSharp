@@ -15,12 +15,16 @@ let alpha = ['a'-'z' 'A'-'Z']
 rule token = parse
   | whitespace+     { token lexbuf }
   | newline+        { token lexbuf }
-  | '@' alpha+      { ID(Lexing.lexeme lexbuf) }
+  | '@' alpha  (digit|alpha)*      { ID(Lexing.lexeme lexbuf) }
   | ['-']?digit+    { INT (Int32.Parse (Lexing.lexeme lexbuf)) } 
   | ['-']?(digit)+ '.' digit*     { FLOAT (Double.Parse((Lexing.lexeme lexbuf).Replace('.',','))) }
   | "if"            { IF }
   | "then"          { THEN }
   | "else"          { ELSE }
+  | "while"         { WHILE }
+  | "proc"          { PROC }
+  | "call"          { CALL }
+  | "get"           { GET }
   | "print"         { PRINT }
   | '+'             { PLUS }
   | '-'             { MINUS }

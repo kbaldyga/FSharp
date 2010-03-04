@@ -1,29 +1,9 @@
 module Ast
 
-(*
-type Expr = 
-  | Ident of string
-  | Assign of string * Expr
-  | Float of System.Double
-  | Int of System.Int32
-  | IfThen of Expr * Expr
-  | Not of Expr
-  | Times of Expr * Expr
-  | Div of Expr * Expr
-  | Plus of Expr * Expr
-  | Minus of Expr * Expr
-  | Gt of Expr * Expr
-  | Ge of Expr * Expr
-  | Lt of Expr * Expr
-  | Le of Expr * Expr
-  | Equal of Expr * Expr
-  | Print of Expr
-  | Skip
- *) 
-  
 type xtree =
   | ID_TREE of string
-  | INT_TREE of int
+  | INT_TREE of System.Int32
+  | FLOAT_TREE of System.Double
   | PLUS_TREE of xtree * xtree
   | MINUS_TREE of xtree * xtree
   | TIMES_TREE of xtree * xtree
@@ -33,7 +13,7 @@ type xtree =
   | GE_TREE of xtree * xtree
 
 type stree =
-  |  ASSIGN_TREE of string * xtree
+  | ASSIGN_TREE of string * xtree
   | NOOP_TREE
   | IF_TREE of xtree * stree * stree
   | WHILE_TREE of xtree * stree

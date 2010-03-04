@@ -2,56 +2,90 @@
 open Ast
 %}
 
-%start Expression
-
 %token <string> ID
 %token <System.Double> FLOAT
 %token <System.Int32> INT
-%token IF THEN ELSE
-%token PLUS MINUS TIMES DIV
 %token LPAREN RPAREN
 %token LBRACE RBRACE
-%token GT GE LT LE
-%token SEMI 
-%token PRINT
-%token EQUAL ASSIGN NOT
+%token PLUS MINUS TIMES DIV
+%token EQUAL GT GE LT LE
+%token IF THEN ELSE WHILE
+%token SEMI
 %token EOF
+%token PRINT
+%token ASSIGN
+%token PROC CALL GET
+%token NOT
 
-%type < Ast.Expr > Expression
-
-%left EQUAL
-%right ASSIGN
-%right IF THEN
-%right PRINT
-
-%left SEMI
-%left GT GE LT LE
-%left MINUS
-%left PLUS
-%left DIV
-%left TIMES 
-
-%right NOT
-
+%start program
+%type <Ast.stree list> program
 
 %%
 
-Expression: 
-    | ID    { Ident($1) }
-    | FLOAT { Float($1) }
-    | INT   { Int($1) }
-    | ID ASSIGN Expression            { Assign($1, $3) }
-    | IF Expression THEN Expression   { IfThen($2, $4) }
-    | PRINT Expression                { Print($2) }
-    | LPAREN Expression RPAREN        { $2 }
-    | NOT Expression                  { Not($2) }
-    | Expression TIMES Expression     { Times($1, $3) }
-    | Expression DIV Expression       { Div($1, $3) }
-    | Expression PLUS Expression      { Plus($1, $3) }
-    | Expression MINUS Expression     { Minus($1, $3) }
-    | Expression GT Expression        { Gt($1, $3) }
-    | Expression GE Expression        { Ge($1, $3) }
-    | Expression LT Expression        { Lt($1, $3) }
-    | Expression LE Expression        { Le($1, $3) }
-    | Expression EQUAL Expression     { Equal($1, $3) }
-    | Expression SEMI                 { $1 }
+program:
+    decls_and_stmts EOF
+        { $1 }
+
+decl:
+    PROC ID stmt {PROC_TREE ($2,$3)}
+
+decls_and_stmts:
+  | decl
+    { [$1] }
+  | stmt
+      { [$1] }
+  | stmt SEMI decls_and_stmts
+      { $1 :: $3 }
+  | decl SEMI decls_and_stmts
+      { $1 :: $3 }
+stmtgroup:
+  | stmt { [$1] }
+  | stmt SEMI stmtgroup { $1 :: $3 }
+
+stmt:
+  | stmt_a1 { $1 }
+  | stmt_a2 { $1 }
+
+stmt_a1:
+  | /* empty */ { NOOP_TREE }
+  | LBRACE stmtgroup RBRACE { STMT_GROUP_TREE $2 }
+  | PRINT expr { PRINT_TREE $2 }
+  | CALL ID { CALL_TREE $2 }
+  | GET ID { GET_TREE $2 }
+  | ID ASSIGN expr { ASSIGN_TREE ($1,$3) }
+  | WHILE LPAREN expr RPAREN stmt_a1 { WHILE_TREE($3,$5)}
+  | IF LPAREN expr RPAREN THEN stmt_a1 ELSE stmt_a1 { IF_TREE($3,$6,$8) }
+
+stmt_a2:
+  | WHILE LPAREN expr RPAREN stmt_a2 { WHILE_TREE($3,$5)}
+  | IF LPAREN expr RPAREN THEN stmt { IF_TREE($3,$6,NOOP_TREE) }
+  | IF LPAREN expr RPAREN THEN stmt_a1 ELSE stmt_a2 { IF_TREE($3,$6,$8) }
+
+
+expr:
+    expr_p0 { $1 }
+
+expr_p0:
+  | expr_p0 EQUAL expr_p1 { EQEQ_TREE ($1,$3) }
+  | expr_p0 GT expr_p1 { GT_TREE ($1,$3) }
+  | expr_p0 LT expr_p1 { GT_TREE ($3,$1) }
+  | expr_p0 GE expr_p1 { GE_TREE ($1,$3) }
+  | expr_p0 LE expr_p1 { GE_TREE ($3,$1) }
+  | expr_p1 { $1 }
+
+expr_p1:
+  | expr_p1 PLUS expr_p2 { PLUS_TREE ($1,$3) }
+  | expr_p1 MINUS expr_p2 { MINUS_TREE ($1,$3) }
+  | expr_p2 { $1 }
+
+expr_p2:
+  | expr_p2 TIMES expr_p3 { TIMES_TREE ($1,$3) }
+  | expr_p2 DIV expr_p3 { DIV_TREE ($1,$3) }
+  | expr_p3 { $1 }
+
+expr_p3:
+  | LPAREN expr_p0 RPAREN { $2 }
+  | ID  { ID_TREE $1 }
+  | INT { INT_TREE $1 }
+  | FLOAT {FLOAT_TREE $1}
+    
