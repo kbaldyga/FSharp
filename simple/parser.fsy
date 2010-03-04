@@ -19,10 +19,19 @@ open Ast
 
 %type < Ast.Expr > Expression
 
-%left PLUS MINUS
-%left TIMES DIV
-%left GT GE LT LE
+%left EQUAL
+%right ASSIGN
+%right IF THEN
+%right PRINT
 
+%left SEMI
+%left GT GE LT LE
+%left MINUS
+%left PLUS
+%left DIV
+%left TIMES 
+
+%right NOT
 
 
 %%
@@ -36,12 +45,13 @@ Expression:
     | PRINT Expression                { Print($2) }
     | LPAREN Expression RPAREN        { $2 }
     | NOT Expression                  { Not($2) }
-    | TIMES Expression Expression     { Times($2, $3) }
-    | DIV Expression Expression       { Div($2, $3) }
-    | PLUS Expression Expression      { Plus($2, $3) }
-    | MINUS Expression Expression     { Minus($2, $3) }
-    | GT Expression Expression        { Gt($2, $3) }
-    | GE Expression Expression        { Ge($2, $3) }
-    | LT Expression Expression        { Lt($2, $3) }
-    | LE Expression Expression        { Le($2, $3) }
-    | EQUAL Expression Expression     { Equal($2, $3) }
+    | Expression TIMES Expression     { Times($1, $3) }
+    | Expression DIV Expression       { Div($1, $3) }
+    | Expression PLUS Expression      { Plus($1, $3) }
+    | Expression MINUS Expression     { Minus($1, $3) }
+    | Expression GT Expression        { Gt($1, $3) }
+    | Expression GE Expression        { Ge($1, $3) }
+    | Expression LT Expression        { Lt($1, $3) }
+    | Expression LE Expression        { Le($1, $3) }
+    | Expression EQUAL Expression     { Equal($1, $3) }
+    | Expression SEMI                 { $1 }
