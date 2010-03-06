@@ -543,7 +543,7 @@ let _fsyacc_reductions ()  =    [|
                 (
                    (
 # 69 "parser.fsy"
-                      EQEQ_TREE (_1,_3) 
+                      EQUAL_TREE (_1,_3) 
                    )
 # 69 "parser.fsy"
                  : 'expr_p0));

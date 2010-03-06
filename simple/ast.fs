@@ -8,7 +8,7 @@ type xtree =
   | MINUS_TREE of xtree * xtree
   | TIMES_TREE of xtree * xtree
   | DIV_TREE of xtree * xtree
-  | EQEQ_TREE of xtree * xtree
+  | EQUAL_TREE of xtree * xtree
   | GT_TREE of xtree * xtree
   | GE_TREE of xtree * xtree
 
