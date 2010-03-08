@@ -31,15 +31,6 @@ let testBoard : Board =
         [ c;c;c;c;c;c;c;c;c;c;c;c ] ;
     ]
 
-type klocek = 
-    struct
-        val x : int
-        val y : int
-        val xsize : int
-        val ysize : int
-        new(x':int, y':int, xsize':int, ysize':int) = { x = x' ; y = y' ; xsize = xsize' ; ysize = ysize' }
-    end
-
 type Ludzik(xsize,ysize) =
     let mutable location = new Rectangle(30,30,xsize,ysize)
     let mutable speed = 5.0
