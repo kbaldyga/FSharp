@@ -8,7 +8,7 @@ open System.Windows
 
 type Element =
     | Brick | Path    
-type direction = Up | Down | Left | Right
+type direction = Up | Down | Left | Right | Null
 type Board =
     Element list list
     
@@ -64,15 +64,20 @@ let bricksOnBoard board =
    
 type Ludzik(xsize,ysize) =
     let mutable location = new Rectangle(PileSize,PileSize,xsize,ysize)
-    let mutable speed = 5.0
+    let mutable speed = 3.0
+    let mutable lastMove = direction.Null
     member self.changeLocation(x,y) = location <- new Rectangle(self.Location.X+x,self.Location.Y+y,location.Width, location.Height)
     member self.changeSpeed = fun s -> speed <- s 
     member self.Location  with get() : Rectangle = location and set(value) = location <- value
     member self.Speed with get() = speed and set(value) = speed <- value 
+    member self.LastMove with get() = lastMove and set(value) = lastMove <- value
+ 
+let isOnList e list =
+    List.fold ( fun acc x -> if e=x then true else acc) false list 
  
 type BadMotherfucker() =
     inherit Ludzik(PileSize,PileSize)
-    let mutable speed = 3.0
+    let mutable speed = 2.0
     let mutable dir = direction.Right
     let mutable previousDir = direction.Right
     
@@ -80,9 +85,16 @@ type BadMotherfucker() =
         let possibleWays = 
             let x = self.Location.X/PileSize
             let y = self.Location.Y/PileSize
+            let xm = x-1 
+            let xp = x+1
+            let ym = y-1
+            let yp = y+1            
             let b = bricksOnBoard testBoard
-            in [(x-1,y);(x+1,y);(x,y-1);(x,y+1)] 
-                |> List.filter ( fun e -> List.fold( fun acc x -> if e=x then false else acc) true b)
+            let ok = [(x-1,y);(x+1,y);(x,y-1);(x,y+1)] |>
+                         List.filter ( fun e -> not (isOnList e b))
+            in List.map ( fun e -> if e = (xm,y) then direction.Left else 
+                                   if e = (xp,y) then direction.Right else
+                                   if e = (x,ym) then direction.Up else direction.Down ) ok
         in possibleWays
         
             
@@ -119,14 +131,15 @@ type MyForm = class
         let drawPlayer = g'.FillRectangle(brushP, self.player.Location.X, self.player.Location.Y, PileSize,PileSize) 
         in drawPlayer
          
-    new () as self = { g = null ; board = [[]] ; player = new Ludzik(PileSize, PileSize) ; label=new Label()} then 
+    new () as self = { g = null ; board = [[]] ; player = new Ludzik(PileSize, PileSize) ;
+                       label=new Label() } then 
         self.SetStyle ( ControlStyles.UserPaint, true ) ;
         self.SetStyle (ControlStyles.DoubleBuffer, true ) ;
         self.SetStyle ( ControlStyles.AllPaintingInWmPaint, true );
         self.Text <- "TestApp" ;
         self.label.Height <- 100 ;
         self.label.Width <- 200 ;
-        self.label.Location <- new Point(300,300) ;
+        self.label.Location <- new Point(350,300) ;
         self.Controls.Add(self.label);
         self.Show() ;  
     member self.Board with get() = self.board and set(value) = self.board <- value  
@@ -158,7 +171,8 @@ let movePlayer (p:Ludzik) (dir:direction) =
             | Down -> new Rectangle(p.Location.X, p.Location.Y-howMuch,PileSize,PileSize)
             | Left -> new Rectangle(p.Location.X-howMuch, p.Location.Y,PileSize,PileSize)
             | Right -> new Rectangle(p.Location.X+howMuch, p.Location.Y,PileSize,PileSize)
-    if checkCollision newLocation = false then p.Location <- newLocation ;
+            | Null -> p.Location 
+    if checkCollision newLocation = false then p.Location <- newLocation ; p.LastMove <- dir ;
     p 
  
 let keyStates = Array.init 300 ( fun i -> false )
@@ -179,6 +193,10 @@ let ticker =
         if keyStates.[Keys.Up.GetHashCode()] = true then movePlayer (form.player) Down |> ignore
         if keyStates.[Keys.Down.GetHashCode()] = true then movePlayer (form.player) Up |> ignore
         if keyStates.[Keys.Space.GetHashCode()] = true then Application.Exit()
+        else if
+            ( not ((form.player.Location.X % PileSize) = 0) || 
+              not ((form.player.Location.Y % PileSize) = 0)) 
+            then movePlayer (form.player) (form.player.LastMove) |> ignore
         form.Invalidate() ; Console.Write("x ") |> ignore )
     temp
 
