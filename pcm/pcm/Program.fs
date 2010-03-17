@@ -1,5 +1,5 @@
 ﻿// Learn more about F# at http://fsharp.net
-
+// ważne, zamienić Up <-> Down, z jakiegoś powodu są odwrotnie :D
 module pm
 open System
 open System.Drawing
@@ -13,13 +13,14 @@ type Board =
     Element list list
     
 let PileSize = 30 
+let BoardSize = 12
 let testBoard : Board = 
     let c = Element.Brick
     let s = Element.Path
     in
-    [   [ c;c;c;c;c;c;c;c;c;c;c;c ] ;
+    [   [ c;c;c;c;c;c;c;c;c;s;c;c ] ;
         [ c;s;s;s;s;s;s;s;s;s;s;c ] ;
-        [ c;s;c;c;s;c;s;c;c;c;s;c ] ;
+        [ s;s;c;c;s;c;s;c;c;c;s;s ] ;
         [ c;s;c;s;s;c;s;c;s;s;s;c ] ;
         [ c;s;c;s;c;c;s;c;s;c;s;c ] ;
         [ c;s;s;s;s;s;s;c;s;c;s;c ] ;
@@ -28,7 +29,7 @@ let testBoard : Board =
         [ c;s;c;c;s;c;s;c;s;c;s;c ] ;
         [ c;s;c;c;s;c;c;c;s;c;s;c ] ;
         [ c;s;s;s;s;s;s;s;s;s;s;c ] ;
-        [ c;c;c;c;c;c;c;c;c;c;c;c ] ;
+        [ c;c;c;c;c;c;c;c;c;s;c;c ] ;
     ]
 let generateRectangles list = 
     let rec aux list acc = 
@@ -64,9 +65,10 @@ let bricksOnBoard board =
    
 type Ludzik(xsize,ysize) =
     let mutable location = new Rectangle(PileSize,PileSize,xsize,ysize)
-    let mutable speed = 3.0
+    let mutable speed = 2.0
     let mutable lastMove = direction.Null
     member self.changeLocation(x,y) = location <- new Rectangle(self.Location.X+x,self.Location.Y+y,location.Width, location.Height)
+    member self.newLocation(x,y) = location <- new Rectangle(x,y,location.Width, location.Height)
     member self.changeSpeed = fun s -> speed <- s 
     member self.Location  with get() : Rectangle = location and set(value) = location <- value
     member self.Speed with get() = speed and set(value) = speed <- value 
@@ -172,7 +174,17 @@ let movePlayer (p:Ludzik) (dir:direction) =
             | Left -> new Rectangle(p.Location.X-howMuch, p.Location.Y,PileSize,PileSize)
             | Right -> new Rectangle(p.Location.X+howMuch, p.Location.Y,PileSize,PileSize)
             | Null -> p.Location 
-    if checkCollision newLocation = false then p.Location <- newLocation ; p.LastMove <- dir ;
+    if checkCollision newLocation = false then 
+        if ( p.Location.X/PileSize = BoardSize-1 && dir = Right ) then
+            p.newLocation(0,p.Location.Y) ; p.LastMove <- Right ;
+        else if ( p.Location.X = 0 && dir = Left ) then
+            p.newLocation(BoardSize*PileSize,p.Location.Y) ; p.LastMove <- Left ;
+        else if ( p.Location.Y/PileSize = BoardSize-1 && dir = Up ) then
+            p.newLocation(p.Location.X,0) ; p.LastMove <- Up ;
+        else if ( p.Location.Y = 0 && dir = Down ) then
+            p.newLocation(p.Location.X, (BoardSize-1)*PileSize) ; p.LastMove <- Down ;
+        else
+            p.Location <- newLocation ; p.LastMove <- dir ;
     p 
  
 let keyStates = Array.init 300 ( fun i -> false )
@@ -197,7 +209,7 @@ let ticker =
             ( not ((form.player.Location.X % PileSize) = 0) || 
               not ((form.player.Location.Y % PileSize) = 0)) 
             then movePlayer (form.player) (form.player.LastMove) |> ignore
-        form.Invalidate() ; Console.Write("x ") |> ignore )
+        form.Invalidate()  )
     temp
 
 
