@@ -1,5 +1,0 @@
-C:\Users\Kamil\Documents\Visual Studio 2008\Projects\fsharp samples\pcm\pcm\bin\Debug\pcm.exe
-C:\Users\Kamil\Documents\Visual Studio 2008\Projects\fsharp samples\pcm\pcm\bin\Debug\pcm.pdb
-C:\Users\Kamil\Documents\Visual Studio 2008\Projects\fsharp samples\pcm\pcm\obj\Debug\ResolveAssemblyReference.cache
-C:\Users\Kamil\Documents\Visual Studio 2008\Projects\fsharp samples\pcm\pcm\obj\Debug\pcm.exe
-C:\Users\Kamil\Documents\Visual Studio 2008\Projects\fsharp samples\pcm\pcm\obj\Debug\pcm.pdb
